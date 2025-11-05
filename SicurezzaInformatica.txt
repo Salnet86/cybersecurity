@@ -1,0 +1,106 @@
+#!/bin/bash
+# ==========================================
+#  LINUX SECURITY COMMANDS COLLECTION
+#  Autore: SalvoNet
+#  Descrizione: Comandi essenziali per la sicurezza informatica in ambiente Linux
+# ==========================================
+
+# -------------------------------
+# 🔐 PERMESSI E PROTEZIONE FILE
+# -------------------------------
+
+chmod 600 file.txt       # Imposta i permessi: solo il proprietario può leggere/scrivere
+chmod 700 script.sh      # Solo il proprietario può eseguire
+chown root:root file.txt # Cambia proprietario e gruppo del file
+ls -l                    # Mostra i permessi e i proprietari dei file
+umask 077                # Imposta permessi predefiniti più restrittivi per nuovi file
+find / -perm -4000       # Trova file con bit SUID (potenziali rischi di sicurezza)
+lsattr                   # Mostra attributi speciali dei file (es. file immutabili)
+chattr +i file.txt       # Rende un file immutabile (anche da root)
+
+# -------------------------------
+# 🔒 UTENTI E ACCOUNT
+# -------------------------------
+
+sudo adduser nomeutente      # Crea un nuovo utente
+sudo deluser nomeutente      # Rimuove un utente
+sudo passwd nomeutente       # Cambia la password dell’utente
+passwd -l nomeutente         # Blocca un account
+last                         # Mostra gli ultimi accessi al sistema
+who                          # Mostra chi è connesso ora
+w                            # Mostra utenti attivi e processi in corso
+id nomeutente                # Mostra UID, GID e gruppi di un utente
+su - nomeutente              # Passa ad un altro utente in shell sicura
+
+# -------------------------------
+# 🧱 FIREWALL E RETE
+# -------------------------------
+
+sudo ufw status verbose       # Mostra stato e regole del firewall
+sudo ufw enable               # Abilita il firewall
+sudo ufw disable              # Disabilita il firewall
+sudo ufw allow 22/tcp         # Permette l’accesso SSH
+sudo ufw deny 80/tcp          # Blocca accesso HTTP
+sudo ufw default deny incoming # Blocca tutto in ingresso per default
+sudo ufw default allow outgoing # Permette tutto in uscita
+sudo iptables -L -v -n        # Mostra regole firewall attive
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT # Aggiunge regola per SSH
+sudo iptables-save > /etc/iptables/rules.v4        # Salva le regole correnti
+
+# -------------------------------
+# 🕵️‍♂️ MONITORAGGIO E AUDIT
+# -------------------------------
+
+sudo ps aux                   # Mostra tutti i processi
+top                           # Mostra processi in tempo reale
+htop                          # Versione avanzata di top
+sudo netstat -tuln            # Mostra porte e servizi in ascolto
+sudo ss -tuln                 # Alternativa moderna a netstat
+sudo lsof -i                  # Mostra file e porte di rete aperti
+sudo journalctl -xe           # Mostra log di sistema e errori recenti
+sudo tail -f /var/log/auth.log # Monitora in tempo reale i tentativi di accesso
+sudo lastb                    # Mostra tentativi di login falliti
+sudo faillog -a               # Mostra statistiche login falliti
+
+# -------------------------------
+# 🛡️ CONTROLLO INTRUSIONI E SCANSIONI
+# -------------------------------
+
+sudo apt install nmap -y      # Installa scanner di rete nmap
+nmap 192.168.1.1              # Scansiona un host per porte aperte
+nmap -sP 192.168.1.0/24       # Scansiona tutta la rete locale
+sudo apt install fail2ban -y  # Installa fail2ban per bloccare IP sospetti
+sudo systemctl start fail2ban # Avvia il servizio fail2ban
+sudo cat /var/log/fail2ban.log # Mostra log di fail2ban
+sudo apt install chkrootkit -y # Installa scanner anti-rootkit
+sudo chkrootkit               # Controlla presenza di rootkit
+sudo apt install rkhunter -y  # Installa Rootkit Hunter
+sudo rkhunter --check         # Esegue scansione di sicurezza del sistema
+
+# -------------------------------
+# 🧰 ANALISI E STRUMENTI DI SICUREZZA
+# -------------------------------
+
+sudo apt install lynis -y     # Installa Lynis (analisi approfondita sicurezza)
+sudo lynis audit system       # Esegue audit completo del sistema
+sudo apt install clamav -y    # Installa antivirus ClamAV
+sudo freshclam                # Aggiorna database virus
+sudo clamscan -r /home        # Scansiona la directory Home
+sudo apt install apparmor -y  # Installa AppArmor per isolamento processi
+sudo aa-status                # Mostra stato profili AppArmor
+sudo apt install auditd -y    # Installa il demone di audit
+sudo auditctl -l              # Mostra regole di audit attive
+sudo ausearch -m USER_LOGIN   # Mostra eventi di login dal registro di audit
+
+# -------------------------------
+# 🧾 SISTEMA E AGGIORNAMENTI
+# -------------------------------
+
+sudo apt update && sudo apt upgrade -y  # Mantiene il sistema aggiornato
+sudo apt autoremove -y                  # Rimuove pacchetti inutilizzati
+sudo apt list --upgradable              # Mostra pacchetti da aggiornare
+sudo dpkg --get-selections > packages.txt # Salva elenco pacchetti installati
+sudo systemctl list-units --failed      # Mostra servizi falliti
+sudo systemctl status ssh               # Mostra stato del servizio SSH
+sudo systemctl enable ufw               # Abilita firewall all’avvio
+sudo shutdown -r now                    # Riavvia il sistema in sicurezza

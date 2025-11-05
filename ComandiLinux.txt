@@ -1,0 +1,293 @@
+#!/bin/bash
+# ======================================================
+# LINUX SYSTEM COMMANDS — STORAGE, USERS & SHARING
+# Autore: SalvoNet
+# ======================================================
+
+# ======================================================
+# 💾 SEZIONE 1 — STORAGE E DISCHI
+# ======================================================
+
+lsblk
+# Mostra i dispositivi di blocco (dischi, partizioni, volumi)
+
+df -h
+# Mostra lo spazio su disco disponibile in modo leggibile (GB/MB)
+
+du -sh /home
+# Mostra quanto spazio occupa la cartella /home
+
+sudo fdisk -l
+# Elenca tutti i dischi e partizioni (MBR)
+
+sudo fdisk /dev/sda
+# Apre l’utility interattiva per partizionare il disco sda
+
+sudo parted /dev/sda
+# Strumento alternativo (supporta GPT e MBR)
+
+sudo lsblk -f
+# Mostra dischi con filesystem e UUID
+
+sudo blkid
+# Mostra UUID e tipo di filesystem di tutte le partizioni
+
+mount | column -t
+# Elenca tutti i punti di montaggio attivi
+
+sudo mount /dev/sdb1 /mnt
+# Monta una partizione manualmente
+
+sudo umount /mnt
+# Smonta una partizione
+
+sudo mkdir /mnt/usb
+sudo mount /dev/sdb1 /mnt/usb
+# Monta una chiavetta USB
+
+sudo dmesg | tail
+# Mostra messaggi del kernel (utile per vedere dischi collegati)
+
+sudo fdisk -l | grep /dev/
+# Controlla rapidamente tutti i dischi riconosciuti
+
+sudo fsck /dev/sdb1
+# Controlla e ripara il filesystem (da usare solo su dischi non montati)
+
+sudo mkfs.ext4 /dev/sdb1
+# Crea filesystem EXT4 su partizione
+
+sudo mkfs.vfat /dev/sdb1
+# Crea filesystem FAT32
+
+sudo mkfs.ntfs /dev/sdb1
+# Crea filesystem NTFS
+
+sudo tune2fs -l /dev/sda1
+# Mostra dettagli del filesystem EXT (data mount, inode, ecc.)
+
+sudo swapoff -a
+sudo swapon -a
+# Disattiva/attiva lo swap
+
+sudo swapon --show
+# Mostra partizioni di swap attive
+
+cat /etc/fstab
+# File di configurazione dei punti di montaggio automatici
+
+sudo nano /etc/fstab
+# Modifica file fstab (aggiungi montaggi permanenti)
+
+# ======================================================
+# 🧩 SEZIONE 2 — PARTIZIONAMENTO E GESTIONE DISCHI
+# ======================================================
+
+sudo fdisk /dev/sdb
+# Utility base per creare/eliminare partizioni (MBR)
+
+sudo gdisk /dev/sdb
+# Utility per partizioni GPT
+
+sudo parted /dev/sdb print
+# Mostra tabella delle partizioni GPT o MBR
+
+sudo parted /dev/sdb mklabel gpt
+# Crea tabella GPT
+
+sudo parted /dev/sdb mkpart primary ext4 0% 100%
+# Crea partizione primaria EXT4 su tutto il disco
+
+sudo partprobe
+# Rileva nuove partizioni senza riavvio
+
+lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
+# Mostra partizioni, dimensioni e punti di montaggio
+
+sudo resize2fs /dev/sda1
+# Ridimensiona filesystem EXT4 dopo estensione partizione
+
+sudo lvm pvcreate /dev/sdb1
+# Crea Physical Volume LVM
+
+sudo lvm vgcreate archivio_vg /dev/sdb1
+# Crea Volume Group
+
+sudo lvm lvcreate -L 20G -n dati archivio_vg
+# Crea Logical Volume da 20GB
+
+sudo lvm lvdisplay
+# Mostra i volumi logici LVM
+
+sudo mount /dev/archivio_vg/dati /mnt
+# Monta volume logico LVM
+
+# ======================================================
+# 👩 SEZIONE 3 — GESTIONE UTENTI E GRUPPI
+# ======================================================
+
+sudo adduser anna
+# Crea nuova utente (interattivo)
+
+sudo useradd -m -s /bin/bash maria
+# Crea utente manualmente (-m = home, -s = shell)
+
+sudo passwd maria
+# Imposta password utente
+
+sudo deluser anna
+# Elimina utente e mantiene i file
+
+sudo deluser --remove-home anna
+# Elimina utente e la sua home directory
+
+sudo usermod -aG sudo giulia
+# Aggiunge l’utente giulia al gruppo sudo (amministratore)
+
+sudo usermod -L elena
+# Blocca l’account di elena
+
+sudo usermod -U elena
+# Sblocca l’account di elena
+
+id giulia
+# Mostra UID, GID e gruppi di appartenenza
+
+groups sofia
+# Mostra i gruppi di un’utente
+
+cat /etc/passwd
+# Elenco di tutti gli utenti
+
+cat /etc/group
+# Elenco di tutti i gruppi
+
+sudo groupadd progettiste
+# Crea nuovo gruppo
+
+sudo usermod -aG progettiste giulia
+# Aggiunge giulia al gruppo "progettiste"
+
+sudo delgroup progettiste
+# Elimina gruppo
+
+sudo chage -l maria
+# Mostra scadenza password e politiche di sicurezza
+
+sudo chage -M 90 maria
+# Imposta scadenza password ogni 90 giorni
+
+# ======================================================
+# 📁 SEZIONE 4 — CARTELLE E PERMESSI
+# ======================================================
+
+pwd
+# Mostra la directory corrente
+
+ls -la
+# Elenca tutti i file con permessi
+
+mkdir /home/sofia/progetti
+# Crea una cartella
+
+rmdir cartella_vuota
+# Elimina directory vuota
+
+rm -rf /tmp/test
+# Elimina directory e contenuto (ATTENZIONE ⚠️)
+
+cp documento.txt /home/maria/
+# Copia file
+
+mv foto.jpg /home/giulia/
+# Sposta file
+
+touch nuovo.txt
+# Crea file vuoto
+
+chmod 755 script.sh
+# Permessi: proprietario rwx, altri rx
+
+chmod -R 700 /home/elena/privato
+# Permessi ricorsivi
+
+chown giulia:giulia documento.txt
+# Cambia proprietario e gruppo
+
+chown -R sofia:utenti /home/sofia
+# Cambia proprietario ricorsivamente
+
+lsattr file.txt
+# Mostra attributi speciali (immutabile, append-only)
+
+chattr +i file.txt
+# Rende file immutabile
+
+find /home -type f -name "*.log"
+# Trova file per estensione
+
+du -h --max-depth=1 /home
+# Mostra dimensione di sottocartelle
+
+# ======================================================
+# 🌐 SEZIONE 5 — CONDIVISIONI (SAMBA e NFS)
+# ======================================================
+
+# ----- SAMBA (Condivisione con Windows) -----
+sudo apt install samba -y
+sudo systemctl enable smbd
+sudo systemctl start smbd
+
+sudo mkdir -p /srv/samba/condivisa
+sudo chown nobody:nogroup /srv/samba/condivisa
+sudo chmod 777 /srv/samba/condivisa
+
+sudo nano /etc/samba/smb.conf
+# Aggiungi alla fine del file:
+# [condivisa]
+#   path = /srv/samba/condivisa
+#   browseable = yes
+#   read only = no
+#   guest ok = yes
+
+sudo systemctl restart smbd
+# Riavvia il servizio Samba
+
+smbstatus
+# Mostra connessioni SMB attive
+
+# ----- NFS (Condivisione Linux ↔ Linux) -----
+sudo apt install nfs-kernel-server -y
+sudo mkdir -p /srv/nfs/cartella_nfs
+sudo chown -R nobody:nogroup /srv/nfs/cartella_nfs
+sudo chmod 777 /srv/nfs/cartella_nfs
+
+sudo bash -c 'echo "/srv/nfs/cartella_nfs *(rw,sync,no_root_squash)" >> /etc/exports'
+sudo exportfs -ra
+sudo systemctl restart nfs-kernel-server
+
+# Client (macchina remota):
+sudo apt install nfs-common -y
+sudo mount 192.168.1.10:/srv/nfs/cartella_nfs /mnt
+# Monta la cartella condivisa NFS
+
+# ======================================================
+# 🔄 SEZIONE 6 — BACKUP E SINCRONIZZAZIONE
+# ======================================================
+
+tar -cvzf backup_home.tar.gz /home
+# Crea backup compresso della home
+
+tar -xvzf backup_home.tar.gz -C /restore
+# Estrae backup in cartella /restore
+
+rsync -avh /home/sofia/ /mnt/backup/
+# Sincronizza dati tra directory
+
+rsync -avz /home/maria/ user@192.168.1.10:/backup/
+# Sincronizza con un server remoto via SSH
+
+# ======================================================
+# ✅ FINE SCRIPT
+# ======================================================
+echo "✅ Tutti i comandi Linux principali caricati con successo!"
