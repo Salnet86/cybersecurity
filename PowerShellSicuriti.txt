@@ -1,0 +1,236 @@
+<#
+=========================================================
+ WINDOWS SYSTEM COMMANDS — STORAGE, USERS & SHARING
+ Autore: SalvoNet
+ Ruolo: Tirocinante in Sicurezza Informatica
+=========================================================
+#>
+
+Write-Host "🧠 Avvio comandi di amministrazione Windows..." -ForegroundColor Cyan
+
+# ======================================================
+# 💾 SEZIONE 1 — STORAGE E DISCHI
+# ======================================================
+
+Get-PhysicalDisk
+# Mostra lo stato dei dischi fisici (modello, salute, capacità)
+
+Get-Disk
+# Elenca tutti i dischi del sistema con stato e dimensione
+
+Get-Volume
+# Mostra le partizioni con lettera, filesystem e spazio libero
+
+Get-Partition
+# Elenca tutte le partizioni su tutti i dischi
+
+Get-PSDrive
+# Mostra le unità logiche montate
+
+mountvol
+# Elenca i volumi montati e i relativi GUID
+
+Format-Volume -DriveLetter D -FileSystem NTFS -NewFileSystemLabel "Archivio" -Confirm:$false
+# Formatta una partizione in NTFS e imposta un'etichetta
+
+Clear-Disk -Number 2 -RemoveData -Confirm:$false
+# Cancella tutti i dati e le partizioni su un disco specifico
+
+Optimize-Volume -DriveLetter C -Defrag -Verbose
+# Esegue deframmentazione o ottimizzazione SSD
+
+chkdsk C: /f
+# Controlla e corregge errori del disco C:
+
+# ======================================================
+# 🧩 SEZIONE 2 — FILESYSTEM E PARTIZIONAMENTO
+# ======================================================
+
+Get-Volume
+# Mostra tutte le unità con filesystem e stato
+
+Format-Volume -DriveLetter E -FileSystem FAT32 -Confirm:$false
+# Formatta in FAT32
+
+New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter
+# Crea una nuova partizione su un disco specifico
+
+Remove-Partition -DiskNumber 1 -PartitionNumber 2 -Confirm:$false
+# Rimuove una partizione
+
+Set-Partition -DriveLetter D -NewDriveLetter F
+# Cambia la lettera di unità
+
+# ======================================================
+# 👩 SEZIONE 3 — GESTIONE UTENTI E GRUPPI
+# ======================================================
+
+net user
+# Elenca tutti gli utenti locali
+
+net user maria /add
+# Crea una nuova utente "maria"
+
+net user maria Password123!
+# Imposta la password per "maria"
+
+net user giulia /add
+net localgroup administrators giulia /add
+# Aggiunge "giulia" e la imposta come amministratrice
+
+net user elena /delete
+# Elimina l’utente "elena"
+
+Get-LocalUser
+# Mostra utenti locali con stato (abilitato/disabilitato)
+
+Disable-LocalUser -Name "sofia"
+# Disattiva un account utente
+
+Enable-LocalUser -Name "sofia"
+# Riattiva l’account utente
+
+Get-LocalGroup
+# Elenca tutti i gruppi locali
+
+New-LocalGroup -Name "Progettiste" -Description "Gruppo di lavoro tecnico"
+# Crea un nuovo gruppo
+
+Add-LocalGroupMember -Group "Progettiste" -Member "maria"
+# Aggiunge utente al gruppo
+
+Remove-LocalGroupMember -Group "Progettiste" -Member "elena"
+# Rimuove utente dal gruppo
+
+# ======================================================
+# 📁 SEZIONE 4 — CARTELLE E PERMESSI
+# ======================================================
+
+New-Item -ItemType Directory -Path "C:\Dati"
+# Crea una nuova cartella
+
+New-Item -ItemType File -Path "C:\Dati\progetto.txt"
+# Crea un file vuoto
+
+Remove-Item -Path "C:\VecchiDati" -Recurse -Force
+# Elimina una cartella con tutto il contenuto
+
+Copy-Item -Path "C:\Dati\progetto.txt" -Destination "D:\Backup"
+# Copia file
+
+Move-Item -Path "C:\Dati\progetto.txt" -Destination "C:\Progetti"
+# Sposta file
+
+icacls "C:\Progetti" /grant giulia:(F)
+# Concede permesso completo (Full control) a giulia
+
+icacls "C:\Progetti" /remove elena
+# Rimuove i permessi per elena
+
+attrib +R "C:\Dati\progetto.txt"
+# Imposta file come sola lettura
+
+attrib -R "C:\Dati\progetto.txt"
+# Rimuove la protezione di sola lettura
+
+dir /q
+# Mostra proprietari dei file
+
+takeown /f "C:\Dati\progetto.txt"
+# Prende possesso di un file
+
+# ======================================================
+# 🌐 SEZIONE 5 — CONDIVISIONI DI RETE
+# ======================================================
+
+New-SmbShare -Name "Condivisa" -Path "C:\Condivisa" -FullAccess "Everyone"
+# Crea una nuova cartella condivisa accessibile in rete
+
+Get-SmbShare
+# Elenca tutte le condivisioni SMB
+
+Remove-SmbShare -Name "Condivisa" -Force
+# Elimina una condivisione
+
+Set-SmbShare -Name "Condivisa" -FolderEnumerationMode AccessBased
+# Abilita la visualizzazione solo ai permessi autorizzati
+
+net share
+# Elenca condivisioni da prompt CMD
+
+# ======================================================
+# 🔄 SEZIONE 6 — BACKUP E SINCRONIZZAZIONE
+# ======================================================
+
+robocopy C:\Users\Maria\Documents D:\Backup /MIR /R:2 /W:5
+# Copia e sincronizza le cartelle (Mirror = specchio)
+
+Compress-Archive -Path C:\Backup -DestinationPath D:\backup.zip
+# Crea un archivio ZIP da una cartella
+
+Expand-Archive -Path D:\backup.zip -DestinationPath C:\Ripristino
+# Estrae un archivio ZIP
+
+wbadmin start backup -backupTarget:D: -include:C: -quiet
+# Esegue un backup completo del disco C: su D:
+
+Get-Job
+# Mostra processi di backup in esecuzione
+
+# ======================================================
+# 🧱 SEZIONE 7 — RETE E FIREWALL
+# ======================================================
+
+Get-NetIPConfiguration
+# Mostra indirizzi IP e schede di rete
+
+Test-Connection 8.8.8.8 -Count 4
+# Ping Google DNS
+
+Get-NetAdapter
+# Elenca tutte le interfacce di rete
+
+Get-NetFirewallProfile
+# Mostra lo stato dei profili del firewall (Domain, Public, Private)
+
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+# Attiva il firewall su tutti i profili
+
+New-NetFirewallRule -DisplayName "Blocca Ping" -Direction Inbound -Protocol ICMPv4 -Action Block
+# Crea regola firewall per bloccare i ping in entrata
+
+Remove-NetFirewallRule -DisplayName "Blocca Ping"
+# Rimuove regola firewall
+
+# ======================================================
+# 🕵️ SEZIONE 8 — SICUREZZA E SISTEMA
+# ======================================================
+
+Get-Process
+# Mostra tutti i processi attivi
+
+Get-Service
+# Elenca servizi di sistema
+
+Stop-Service -Name "Spooler"
+# Arresta il servizio spooler (stampa)
+
+Start-Service -Name "Spooler"
+# Riavvia il servizio
+
+Get-EventLog -LogName System -Newest 20
+# Mostra ultimi eventi di sistema
+
+Get-WindowsDefenderStatus
+# Controlla stato di Windows Defender
+
+Start-MpScan -ScanType FullScan
+# Esegue scansione antivirus completa
+
+Get-LocalUser | Where-Object {$_.Enabled -eq $false}
+# Mostra utenti disabilitati
+
+# ======================================================
+# ✅ FINE SCRIPT
+# ======================================================
+Write-Host "✅ Tutti i comandi Windows caricati con successo!" -ForegroundColor Green

@@ -1,0 +1,200 @@
+===========================================================================
+WINDOWS CMD & POWERSHELL — Password, Wi-Fi (WLAN), net use, map drive
+Autore: SalvoNet — Tirocinante in Sicurezza Informatica (2019)
+===========================================================================
+
+-----------------------------
+SEZIONE A — GESTIONE PASSWORD (CMD)
+-----------------------------
+REM Mostra tutti gli utenti locali
+net user
+
+REM Imposta/modifica la password di un utente (in chiaro)
+REM Esempio: imposta password "NuovaP@ssword" per l'utente maria
+net user maria NuovaP@ssword
+
+REM Chiedi alla console di richiedere una password (non visibile mentre digiti)
+REM Nota: il comando con '*' chiede la password interattivamente
+net user maria *
+
+REM Bloccare / sbloccare account
+REM Bloccare:
+net user maria /active:no
+REM Sbloccare:
+net user maria /active:yes
+
+REM Eliminare utente
+net user maria /delete
+
+REM Forzare cambio password al prossimo accesso
+net user maria /logonpasswordchg:yes
+
+REM Policy password (durata minima/massima, lunghezza minima)
+REM Mostra policy account locali
+net accounts
+REM Impostare durata massima password (in giorni)
+net accounts /maxpwage:90
+REM Impostare lunghezza minima password
+net accounts /minpwlen:8
+REM Impostare numero di tentativi di lockout (solo su dominio o GPO)
+REM (per policy locale avanzata usare secpol.msc o PowerShell e Group Policy)
+
+-----------------------------
+SEZIONE B — GESTIONE PASSWORD (PowerShell modern)
+-----------------------------
+# Elenca utenti locali
+Get-LocalUser
+
+# Imposta password per utente (PS 5.1+). Usa SecureString per non memorizzare in chiaro.
+$pw = Read-Host "Nuova password" -AsSecureString
+Set-LocalUser -Name "maria" -Password $pw
+
+# Forzare cambio password al prossimo logon
+# (setta la proprietà PasswordExpired)
+Set-LocalUser -Name "maria" -PasswordExpired $true
+
+# Disabilita/Abilita utente
+Disable-LocalUser -Name "maria"
+Enable-LocalUser -Name "maria"
+
+# Modificare attributi password (richiede module o gestione via ADSI)
+# Esempio ADSI per cambiare password (legacy)
+$u = [ADSI]"WinNT://$env:COMPUTERNAME/maria,user"
+$u.SetPassword("NuovaP@ssword")
+
+-----------------------------
+SEZIONE C — net use (mappare condivisioni di rete, CMD)
+-----------------------------
+REM Mappa una condivisione come unità Z:
+net use Z: \\SERVER\Condivisione /user:DOMINIO\utente Password
+
+REM Mappa senza specificare lettera (sceglie la prima libera)
+net use \\SERVER\Condivisione /user:utente Password
+
+REM Mappa con persistente (riconnetti al logon)
+net use Z: \\SERVER\Condivisione /user:utente Password /persistent:yes
+
+REM Rimuovi mappatura
+net use Z: /delete
+
+REM Rimuovi tutte le mappature
+net use * /delete
+
+REM Visualizza mappature attive
+net use
+
+REM Montare come un share con credenziali diverse per sessione
+cmdkey /add:SERVER /user:DOMINIO\utente /pass:Password
+net use Z: \\SERVER\Condivisione /persistent:no
+
+-----------------------------
+SEZIONE D — Wi-Fi / WLAN (netsh wlan) — CMD
+-----------------------------
+REM Elenca interfacce wireless
+netsh wlan show interfaces
+
+REM Elenca profili Wi-Fi memorizzati sul PC
+netsh wlan show profiles
+
+REM Mostra dettagli di un profilo (Sicurezza, tipo autenticazione)
+netsh wlan show profile name="NomeProfilo" key=clear
+REM key=clear mostra la password in chiaro (richiede privilegi)
+
+REM Esporta profili in file XML (utile per backup)
+netsh wlan export profile name="NomeProfilo" folder="C:\backup_wifi" key=clear
+
+REM Importa/aggiunge un profilo da file XML
+netsh wlan add profile filename="C:\backup_wifi\NomeProfilo.xml"
+
+REM Connetti a una rete Wi-Fi (profilo già presente)
+netsh wlan connect name="NomeProfilo" ssid="NomeSSID" interface="Wi-Fi"
+
+REM Disconnetti l'interfaccia Wi-Fi
+netsh wlan disconnect interface="Wi-Fi"
+
+REM Elenca reti disponibili (scan)
+netsh wlan show networks mode=bssid
+
+REM Elimina profilo memorizzato
+netsh wlan delete profile name="NomeProfilo"
+
+REM Crea profilo wireless (XML manuale necessario) o usare netsh wlan add profile
+
+-----------------------------
+SEZIONE E — WLAN (PowerShell) — comandi moderni
+-----------------------------
+# Elenca profili Wi-Fi (PowerShell)
+(netsh wlan show profiles)  # output netsh è spesso ancora il più completo
+
+# Connetti a rete Wi-Fi con credenziali (usando netsh via PS)
+netsh wlan connect name="NomeProfilo"
+
+# Creare/Importare profilo: usare netsh export/import come sopra oppure
+# usare Native WiFi API tramite script più avanzati o module PS di terze parti.
+
+-----------------------------
+SEZIONE F — Informazioni utili su connessioni e porte
+-----------------------------
+REM Visualizza connessioni e PID (CMD)
+netstat -ano
+
+REM (PowerShell) elenco connessioni TCP
+Get-NetTCPConnection
+
+REM Mostra processi per PID (usare Task Manager o)
+tasklist /FI "PID eq 1234"
+
+-----------------------------
+SEZIONE G — Comandi utili di rete e autenticazione
+-----------------------------
+REM Test ping
+ping 8.8.8.8
+
+REM Traccia percorso
+tracert google.com
+
+REM Risoluzione DNS
+nslookup openai.com
+
+REM Mostra utenti autenticati / sessioni (Server)
+query user
+
+REM Controlla credenziali memorizzate (Windows Credential Manager via cmdkey)
+cmdkey /list
+
+REM Aggiungi credenziale per accesso a server
+cmdkey /add:SERVER /user:DOMINIO\utente /pass:Password
+
+-----------------------------
+SEZIONE H — Esempi pratici rapidi
+-----------------------------
+REM 1) Mappare \\192.168.1.10\backup come Z: con utente "maria"
+net use Z: \\192.168.1.10\backup /user:maria P@ssw0rd /persistent:yes
+
+REM 2) Connettere a Wi-Fi "Casa" (profilo già presente)
+netsh wlan connect name="Casa"
+
+REM 3) Forzare cambio password (chiede nuova password interattiva)
+net user maria *
+
+REM 4) Visualizzare password Wi-Fi in chiaro di un profilo (richiede admin)
+netsh wlan show profile name="Casa" key=clear
+
+REM 5) Eliminare tutte le mappature di rete
+net use * /delete /y
+
+-----------------------------
+NOTE DI SICUREZZA
+-----------------------------
+- Evita di inserire password in chiaro negli script: meglio usare input interattivo o memorizzare credenziali con il Credential Manager (cmdkey) o SecureString in PowerShell.
+- Quando usi `netsh wlan show profile name="..." key=clear` la password viene mostrata in chiaro sullo schermo: usalo solo su macchine di tua proprietà.
+- Molti comandi richiedono prompt con privilegi elevati (esegui "Esegui come amministratore").
+- Per gestione enterprise/Active Directory usare strumenti e policy centralizzate (GPO, AD cmdlets).
+
+===========================================================================
+
+FINE cheat-sheet — se vuoi, te lo converto in:
+- file `.bat` pronto (solo comandi CMD),
+- file `.ps1` con versioni PowerShell (inclusi input sicuri),
+- versione README.md per GitHub (con tabella comandi e spiegazioni).
+Dimmi quale formato preferisci!
