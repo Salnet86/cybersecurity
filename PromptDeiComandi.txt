@@ -1,0 +1,71 @@
+----Prompt cmd - - - 
+Modalità provvisoria 
+
+1) bcdedit /set {globalsettings} advancedoptions true
+Modalità ripristinata 
+2)  bcdedit /set {globalsettings} advancedoptions false
+Informazioni apparato hardware 
+3) SYSTEMINFO 
+Esempio 
+SYSTEMINFO >  information.txt 
+
+--Gestione dischi pc Windows - - - 
+1) list disk 
+2) select disk 1 or disk 2
+3) select volume 
+4) clean 
+5) create partition primary size=102400
+6) active 
+7) format fs=fat32 quick
+8) assign letter=E
+9) delete volume 
+----------------------
+Esempio 
+list disk 
+select disk 2
+select volume 1
+clean
+create partition primary size=102400
+format fs=NTFS label=4usb quick 
+assign letter=F
+active 
+extend size=20480
+-------------------------
+Convert disk GPT OR MBR 
+------------------
+Net user 
+------------------
+
+Remover password account 
+1) net user username/passwordreg:yes
+2) net user username /passwordreg:no
+Disable Enable account 
+3) net user "User Name" /active:no
+4) net user "User Name" /active:yes
+
+Per abilitare un account di dominio Enter
+Digitare prima 
+net user "User Name" /active:yes
+Poi net user "User Name" /active:yes /domain
+Aggiungi account 
+net user /add username
+net user /delete username 
+
+Impostare Scadenza password account 
+net user username /expires:11/09/2024
+reset password account 
+net user username nuova password 
+Impostare nuova  password utente 
+net user username*
+oppure cambiare password 
+net user /passwordchg:no
+-----------------------------
+NETSH WLAN SHOW PROFILES 
+NETSH WLAN SHOW PROFILES NAME="" KEY=CLEAR
+-----------------------------
+SSH NOMEUTENTE@IP INVIO 
+----------------------------
+curl http://www.esempio.com
+-----------------------------
+
+
