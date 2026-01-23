@@ -1,0 +1,39 @@
+sudo ufw allow 8080/tcp
+sudo ufw allow 8080/udp
+
+primo esecizio
+
+installazione sul pc
+
+sudo apt update
+sudo apt install openssh-server fswebcam
+
+hostname -I
+
+sul teminale termux pkg install openssh
+ssh nomeutente@ip
+
+fswebcam --device /dev/video0 output.jpg
+
+-----------------------------------------------------------------
+secondo comando webcam prima installazione su Linux questo ffmpeg
+
+sudo apt update && sudo apt install ffmpeg v4l-utils
+
+ffmpeg -f v4l2 -i /dev/video0 -vcodec mjpeg -f mpjpeg -listen 1 -metadata title="Webcam" http://0.0.0.0:8080/video.mjpeg
+
+
+
+su app vlc http://127.0.0.1:8080/video.mjpeg
+
+
+--------------------------------------------------
+togli regole
+
+sudo ufw enable
+sudo ufw status
+
+sudo ufw delete allow 8080/tcp
+sudo ufw deny 8080/tcp
+sudo ufw enable
+sudo ufw status
